@@ -1,0 +1,33 @@
+/ {
+	aliases {
+		led-a = &led_a;
+		led-b = &led_b;
+		led-c = &led_c;
+		sw0   = &toggle_switch;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		led_a: led_1 {
+			gpios = <&gpiob 0 GPIO_ACTIVE_HIGH>;  /* Onboard Green LED */
+			label = "LED Green";
+		};
+		led_b: led_2 {
+			gpios = <&gpiof 4 GPIO_ACTIVE_HIGH>;  /* Onboard Yellow LED */
+			label = "LED Yellow";
+		};
+		led_c: led_3 {
+			gpios = <&gpiog 4 GPIO_ACTIVE_HIGH>;  /* Onboard Red LED */
+			label = "LED Red";
+		};
+	};
+
+	buttons {
+		compatible = "gpio-keys";
+		toggle_switch: switch_1 {
+			/* Pin 8 on the arduino_header nexus node corresponds to D2 */
+			gpios = <&arduino_header 8 GPIO_ACTIVE_HIGH>;
+			label = "Switch on D2";
+		};
+	};
+};
