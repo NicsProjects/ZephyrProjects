@@ -1,0 +1,34 @@
+/ {
+	aliases {
+		led-green = &led_green;
+		led-red   = &led_red;
+		sw0       = &toggle_switch;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		led_green: led_1 {
+			gpios = <&gpiob 0 GPIO_ACTIVE_HIGH>;  /* Onboard Green LED */
+			label = "LED Green";
+		};
+		led_red: led_2 {
+			gpios = <&gpiog 4 GPIO_ACTIVE_HIGH>;  /* Onboard Red LED */
+			label = "LED Red";
+		};
+	};
+
+	buttons {
+		compatible = "gpio-keys";
+		toggle_switch: switch_1 {
+			gpios = <&arduino_header 8 GPIO_ACTIVE_HIGH>; /* Pin D2 */
+			label = "Switch on D2";
+		};
+	};
+
+	hc_sr04: hc-sr04 {
+		compatible = "hc-sr04";
+		trigger-gpios = <&arduino_header 9 GPIO_ACTIVE_HIGH>;
+		echo-gpios = <&arduino_header 10 GPIO_ACTIVE_HIGH>;
+		status = "okay";
+	};
+};
