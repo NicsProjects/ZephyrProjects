@@ -1,0 +1,33 @@
+/ {
+	aliases {
+		led-green = &led_green;
+		led-red   = &led_red;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		led_green: led_1 {
+			gpios = <&gpiob 0 GPIO_ACTIVE_HIGH>;
+			label = "LED Green";
+		};
+		led_red: led_2 {
+			gpios = <&gpiog 4 GPIO_ACTIVE_HIGH>;
+			label = "LED Red";
+		};
+	};
+
+	/* DHT11/DHT22 on D2 */
+	dht_sensor: dht11 {
+		compatible = "aosong,dht";
+		status = "okay";
+		dio-gpios = <&arduino_header 8 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+	};
+
+	/* HC-SR04 on D3 and D4 */
+	hc_sr04: hc-sr04 {
+		compatible = "hc-sr04";
+		trigger-gpios = <&arduino_header 9 GPIO_ACTIVE_HIGH>;
+		echo-gpios = <&arduino_header 10 GPIO_ACTIVE_HIGH>;
+		status = "okay";
+	};
+};

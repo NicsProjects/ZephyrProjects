@@ -1,0 +1,8 @@
+zephyr/
+modules/
+bootloader/
+tools/
+.west/
+.venv/
+build/
+stm32-zephyr-projects/

@@ -1,0 +1,37 @@
+/ {
+	aliases {
+		led-green = &led_green;
+		led-red   = &led_red;
+		sw0       = &toggle_switch;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		led_green: led_1 {
+			gpios = <&gpiob 0 GPIO_ACTIVE_HIGH>;
+			label = "LED Green";
+		};
+		led_red: led_2 {
+			gpios = <&gpiog 4 GPIO_ACTIVE_HIGH>;
+			label = "LED Red";
+		};
+	};
+
+	buttons {
+		compatible = "gpio-keys";
+		toggle_switch: switch_1 {
+			gpios = <&arduino_header 8 GPIO_ACTIVE_HIGH>; /* D2 Pin */
+			label = "Switch on D2";
+		};
+	};
+
+	dht_sensor: dht11 {
+		compatible = "aosong,dht";
+		status = "okay";
+        dht22;
+
+		/* Grove SIG connected to D3 */
+		dio-gpios = <&arduino_header 9 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+		label = "DHT22";
+	};
+};
