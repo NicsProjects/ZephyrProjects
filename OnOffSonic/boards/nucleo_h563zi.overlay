@@ -32,4 +32,4 @@
 		echo-gpios = <&arduino_header 10 GPIO_ACTIVE_HIGH>;
 		status = "okay";
 	};
-};/*iyg;iyfpy8fpfulfufoltu
+};
