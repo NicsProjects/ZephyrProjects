@@ -25,7 +25,7 @@
 		};
 	};
 
-	/* HC-SR04 uses D9 as a trigger pulse output and D10 as the echo input, so the firmware can measure distance by timing the returning pulse. */
+	/* HC-SR04 uses D3 as a trigger pulse output and D4 as the echo input, so the firmware can measure distance by timing the returning pulse. */
 	hc_sr04: hc-sr04 {
 		compatible = "hc-sr04"; 
 		trigger-gpios = <&arduino_header 9 GPIO_ACTIVE_HIGH>; 
