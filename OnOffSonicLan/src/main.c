@@ -9,13 +9,28 @@
 #include <stdio.h>
 #include <string.h>
 
+/*
+ * Physical wiring (see boards/nucleo_h563zi.overlay for the DT side):
+ *   led_green -> onboard LD1, PB0
+ *   led_red   -> onboard LD3, PG4
+ *   sw0       -> SPDT toggle switch, common pin on D2, throws on 3V3/GND
+ *   hc_sr04   -> TRIG on D3, ECHO on D4 (via 1k/2k divider down to 3.3V)
+ */
+
 #define UDP_PORT 5005
 #define UDP_MSG_MAX 128
 
-static const struct gpio_dt_spec led_green  = GPIO_DT_SPEC_GET(DT_ALIAS(led_green), gpios);
-static const struct gpio_dt_spec led_red    = GPIO_DT_SPEC_GET(DT_ALIAS(led_red), gpios);
-static const struct gpio_dt_spec switch_pin = GPIO_DT_SPEC_GET(DT_ALIAS(sw0), gpios);
-static const struct device *const sensor    = DEVICE_DT_GET(DT_NODELABEL(hc_sr04));
+static const struct gpio_dt_spec led_green =
+	GPIO_DT_SPEC_GET(DT_ALIAS(led_green), gpios);
+
+static const struct gpio_dt_spec led_red =
+	GPIO_DT_SPEC_GET(DT_ALIAS(led_red), gpios);
+
+static const struct gpio_dt_spec switch_pin =
+	GPIO_DT_SPEC_GET(DT_ALIAS(sw0), gpios);
+
+static const struct device *const sensor =
+	DEVICE_DT_GET(DT_NODELABEL(hc_sr04));
 
 static int udp_socket_init(void)
 {
@@ -61,19 +76,20 @@ int main(void)
 	int state;
 	int ready = 0;
 
-	if (!gpio_is_ready_dt(&led_green) || !gpio_is_ready_dt(&led_red) ||
+	if (!gpio_is_ready_dt(&led_green) ||
+	    !gpio_is_ready_dt(&led_red) ||
 	    !gpio_is_ready_dt(&switch_pin)) {
-		printk("Error: GPIO pin setup failed.\n");
+		printk("ERROR: GPIO setup failed\n");
 		return -1;
 	}
 
 	if (!device_is_ready(sensor)) {
-		printk("Error: HC-SR04 sensor driver not ready.\n");
+		printk("ERROR: HC-SR04 driver not ready\n");
 		return -1;
 	}
 
 	gpio_pin_configure_dt(&led_green, GPIO_OUTPUT_INACTIVE);
-	gpio_pin_configure_dt(&led_red, GPIO_OUTPUT_INACTIVE);
+	gpio_pin_configure_dt(&led_red, GPIO_OUTPUT_ACTIVE);
 	gpio_pin_configure_dt(&switch_pin, GPIO_INPUT);
 
 	udp_sock = udp_socket_init();
@@ -81,7 +97,10 @@ int main(void)
 		return -1;
 	}
 
+	printk("\n");
+	printk("*** OnOffSonicLan ***\n");
 	printk("System Initialized Successfully!\n");
+	printk("HC-SR04 driver ready.\n");
 
 	while (1) {
 		state = gpio_pin_get_dt(&switch_pin);
