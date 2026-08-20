@@ -1,0 +1,13 @@
+/ {
+	aliases {
+		probe-echo = &probe_echo;
+	};
+
+	logic-analyzer-probe {
+		compatible = "gpio-keys";
+		probe_echo: echo {
+			gpios = <&arduino_header 10 GPIO_ACTIVE_HIGH>; /* D4 */
+			label = "HC-SR04 echo probe";
+		};
+	};
+};

@@ -6,7 +6,7 @@ This repository is a small collection of Zephyr RTOS learning projects built aro
 
 The code in these projects is intentionally focused on learning and experimentation rather than being a full production application. The files show the use of device tree, GPIO, sensor drivers, threads, and simple input/output control on an embedded board.
 
-All five projects in this README are intended as learning exercises for Zephyr RTOS.
+All six projects in this README are intended as learning exercises for Zephyr RTOS.
 
 ## Project summary
 
@@ -17,6 +17,7 @@ All five projects in this README are intended as learning exercises for Zephyr R
 | OnOffSensors | Combined temperature/humidity and distance monitoring | Sensor API, DHT sensor driver, HC-SR04 driver, GPIO status LEDs, serial logging |
 | OnOffSonic | Ultrasonic distance measurement with on/off behavior | HC-SR04 sensor driver, switch-controlled system state, GPIO output status indications |
 | OnOffTemp | Temperature and humidity monitoring with switch-controlled operation | DHT sensor driver, GPIO input/output, periodic sensor sampling |
+| OnOffSonicLogicAnalyzer | Companion pulse-timing probe for HC-SR04 signals | GPIO interrupts, pulse-width measurement, logic-analyzer verification |
 
 ## Relationship between the projects
 
@@ -86,6 +87,15 @@ zephyrproject/
 │   │   └── nucleo_h563zi.overlay
 │   └── src/
 │       └── main.c
+├── OnOffSonicLogicAnalyzer/
+│   ├── CMakeLists.txt
+│   ├── prj.conf
+│   ├── west.yml
+│   ├── README.md
+│   ├── boards/
+│   │   └── nucleo_h563zi.overlay
+│   └── src/
+│       └── main.c
 ├── bootloader/
 ├── build/
 ├── modules/
@@ -96,7 +106,7 @@ zephyrproject/
 └── README.md   <- this file
 ```
 
-> The workspace also contains build output, Zephyr sources, and tool directories. The project applications themselves are the five folders listed above.
+> The workspace also contains build output, Zephyr sources, and tool directories. The project applications themselves are the six folders listed above.
 
 ---
 
@@ -486,6 +496,93 @@ Temp: 23.11 C  |  Humidity: 44.22 %
 
 ---
 
+### 6) OnOffSonicLogicAnalyzer
+
+#### What it does
+
+This companion project runs on a second NUCLEO-H563ZI and measures the
+HC-SR04 ECHO pulse from `OnOffSonic`. It reports the pulse width in
+microseconds so the result can be compared with a hardware logic-analyzer
+capture.
+
+#### Purpose
+
+To demonstrate:
+
+- GPIO edge interrupts
+- Pulse-width measurement with Zephyr cycle timestamps
+- Hardware verification with an 8-channel, 24 MHz logic analyzer
+
+#### Hardware/board
+
+- Target board: `nucleo_h563zi` used as the probe board
+- DUT: the separate `OnOffSonic` NUCLEO-H563ZI board
+- The probe board reads Arduino D4 as its ECHO input
+- Keep the HC-SR04 1k/2k ECHO voltage divider in place
+
+#### Logic-analyzer wiring
+
+Connect the logic analyzer to the DUT as follows:
+
+```text
+DUT NUCLEO-H563ZI       8CH, 24 MHz logic analyzer
+--------------------------------------------------
+GND ------------------- GND
+D3 / HC-SR04 TRIG ----- CH0
+D4 / divided ECHO ----- CH1
+```
+
+Connect CH1 at the same point as DUT D4, after the existing voltage divider.
+Configure the analyzer for 3.3 V digital logic and leave the other channels
+disconnected. Do not connect the analyzer to the raw 5 V HC-SR04 ECHO signal.
+
+The probe board wiring is:
+
+```text
+OnOffSonic DUT D4 ----- probe board D4
+DUT GND --------------- probe board GND
+```
+
+#### Peripherals used
+
+- GPIO input with both-edge interrupt detection
+- Serial console output via `printk()`
+- External 8-channel logic analyzer for TRIG and ECHO capture
+
+#### Important source files
+
+- `src/main.c` — timestamps ECHO rising and falling edges and prints pulse width
+- `boards/nucleo_h563zi.overlay` — maps the probe ECHO input to Arduino D4
+- `README.md` — documents probe-board and logic-analyzer wiring
+
+#### Build and flash
+
+From the workspace root:
+
+```bash
+west build -b nucleo_h563zi -d OnOffSonicLogicAnalyzer/build OnOffSonicLogicAnalyzer
+west flash -d OnOffSonicLogicAnalyzer/build
+```
+
+For the probe board's serial console:
+
+```bash
+screen /dev/ttyACM0 115200
+```
+
+#### Expected behavior at runtime
+
+The probe prints pulse widths in a format similar to:
+
+```text
+echo: 1843 us
+```
+
+The ECHO high-time is proportional to the measured distance. The TRIG pulse
+should be at least 10 us high.
+
+---
+
 ## Common build and flash workflow
 
 Each project is structured as a standalone Zephyr application with its own `west.yml` manifest. The usual workflow is:
@@ -506,12 +603,13 @@ Where the files are ambiguous or contradictory, this README states the actual fi
 
 ## Conclusion
 
-These five projects demonstrate a natural progression in Zephyr learning:
+These six projects demonstrate a natural progression in Zephyr learning:
 
 1. GPIO blinking
 2. Switch-driven GPIO control
 3. Multi-sensor monitoring
 4. Ultrasonic ranging with a control input
 5. Temperature/humidity monitoring with a switch-driven lifecycle
+6. GPIO pulse measurement and logic-analyzer verification
 
 Together they form a practical introduction to Zephyr RTOS programming on the STM32 NUCLEO-H563ZI board.
